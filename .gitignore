@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Kiro ###
+.kiro/
+
+### Environment / Secrets ###
+application-dev.properties
+*.env
+.env
+firebase-service-account.json
+serviceAccountKey.json
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+logs/
