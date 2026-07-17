@@ -1,5 +1,6 @@
 package com.example.rotinaAPP.Controllers;
 
+import com.example.rotinaAPP.Dtos.CriarHabitoRequest;
 import com.example.rotinaAPP.Dtos.HabitoDoDiaResponse;
 import com.example.rotinaAPP.Entities.Habito;
 import com.example.rotinaAPP.Services.HabitoService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +33,7 @@ public class HabitoController {
     @PostMapping
     public ResponseEntity<Habito> criar(@RequestBody CriarHabitoRequest request){
         Habito habito = habitoService.criar(request.usuarioId(), request.titulo(), request.descricao());
-        return ResponseEntity.status(HttpsStatus.CREATED).body(habito);
+        return ResponseEntity.status(HttpStatus.CREATED).body(habito);
     }
 
     @PostMapping("/{habito}/concluir")
@@ -51,5 +53,4 @@ public class HabitoController {
         habitoService.desmarcar(habitoId, data);
         return ResponseEntity.ok().build();
     }
-    )
 }
