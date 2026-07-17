@@ -11,5 +11,6 @@ import java.util.UUID;
 public interface RegistroHabitoRepository extends JpaRepository<RegistroHabito, UUID> {
 
     Optional<RegistroHabito> findByHabitoIdAndData(UUID habitoId, LocalDate data);
-    List<RegistroHabito> findByHabitoIdAndDataBetwee(UUID habitoId, LocalDate inicio, LocalDate fim);
+
+    List<RegistroHabito> findByHabitoIdAndDataBetween(UUID habitoId, LocalDate inicio, LocalDate fim);
 }

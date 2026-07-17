@@ -2,6 +2,7 @@ package com.example.rotinaAPP.Entities;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -15,38 +16,24 @@ public class Habito {
     @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
     private String descricao;
 
     @Column(nullable = false)
     private boolean ativo = true;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    public Usuario getUsuario() {
-        return usuario;
+    @OneToMany(mappedBy = "habito")
+    private List<RegistroHabito> registros;
+
+    public UUID getId() {
+        return id;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getTitulo() {
@@ -57,23 +44,39 @@ public class Habito {
         this.titulo = titulo;
     }
 
-    public UUID getId() {
-        return id;
+    public String getDescricao() {
+        return descricao;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Habito habito = (Habito) o;
-        return ativo == habito.ativo && Objects.equals(id, habito.id) && Objects.equals(titulo, habito.titulo) && Objects.equals(descricao, habito.descricao) && Objects.equals(usuario, habito.usuario);
+        return Objects.equals(id, habito.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, titulo, descricao, ativo, usuario);
+        return Objects.hash(id);
     }
 }

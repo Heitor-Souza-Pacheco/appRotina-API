@@ -23,7 +23,7 @@ public class HabitoService {
     @Autowired
     private RegistroHabitoRepository registroHabitoRepository;
 
-    public Habito criar(UUID usuarioId, String titulo, String descricao){
+    public Habito criar(UUID usuarioId, String titulo, String descricao) {
         Habito habito = new Habito();
         habito.setTitulo(titulo);
         habito.setDescricao(descricao);
@@ -35,8 +35,7 @@ public class HabitoService {
         return habitoRepository.save(habito);
     }
 
-    public List<HabitoDoDiaResponse> listarHabitosDoDia(UUID usuarioId, LocalDate data){
-
+    public List<HabitoDoDiaResponse> listarHabitosDoDia(UUID usuarioId, LocalDate data) {
         List<Habito> habitos = habitoRepository.findByUsuarioIdAndAtivoTrue(usuarioId);
 
         return habitos.stream().map(habito -> {
@@ -54,12 +53,15 @@ public class HabitoService {
         }).toList();
     }
 
-    public void marcarConcluido(UUID habitoId, LocalDate data){
-
+    public void marcarConcluido(UUID habitoId, LocalDate data) {
         Optional<RegistroHabito> existente = registroHabitoRepository
                 .findByHabitoIdAndData(habitoId, data);
 
-        if (!existente.isPresent()){
+        if (existente.isPresent()) {
+            RegistroHabito registro = existente.get();
+            registro.setConcluido(true);
+            registroHabitoRepository.save(registro);
+        } else {
             RegistroHabito registro = new RegistroHabito();
             Habito habito = new Habito();
             habito.setId(habitoId);
@@ -68,12 +70,9 @@ public class HabitoService {
             registro.setConcluido(true);
             registroHabitoRepository.save(registro);
         }
-        RegistroHabito registro = new RegistroHabito();
-        registro.setConcluido(true);
-        registroHabitoRepository.save(registro);
     }
 
-    public void desmarcar(UUID habitoId, LocalDate data){
+    public void desmarcar(UUID habitoId, LocalDate data) {
         registroHabitoRepository.findByHabitoIdAndData(habitoId, data)
                 .ifPresent(registroHabitoRepository::delete);
     }

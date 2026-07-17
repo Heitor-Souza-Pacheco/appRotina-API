@@ -7,11 +7,16 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"habito_id", "data"}))
 public class RegistroHabito {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "habito_id")
+    private Habito habito;
 
     @Column(nullable = false)
     private LocalDate data;
@@ -19,16 +24,20 @@ public class RegistroHabito {
     @Column(nullable = false)
     private boolean concluido;
 
-    @ManyToOne
-    @JoinColumn(name = "id")
-    private Habito habito;
-
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public Habito getHabito() {
+        return habito;
+    }
+
+    public void setHabito(Habito habito) {
+        this.habito = habito;
     }
 
     public LocalDate getData() {
@@ -47,23 +56,15 @@ public class RegistroHabito {
         this.concluido = concluido;
     }
 
-    public Habito getHabito() {
-        return habito;
-    }
-
-    public void setHabito(Habito habito) {
-        this.habito = habito;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         RegistroHabito that = (RegistroHabito) o;
-        return concluido == that.concluido && Objects.equals(id, that.id) && Objects.equals(data, that.data) && Objects.equals(habito, that.habito);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, data, concluido, habito);
+        return Objects.hash(id);
     }
 }
