@@ -1,10 +1,11 @@
 package com.example.rotinaAPP.Controllers;
 
+import com.example.rotinaAPP.Dtos.AtualizarPerfilRequest;
 import com.example.rotinaAPP.Entities.Usuario;
 import com.example.rotinaAPP.Services.UsuarioService;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +16,9 @@ public class PerfilController {
     private UsuarioService usuarioService;
 
     @PutMapping("/perfil")
-    public ResponseEntity<Usuario> atualizarPerfil(Authentication authentication, @RequestBody AtualizarPerfilRequest request){
+    public ResponseEntity<Usuario> atualizarPerfil(
+            Authentication authentication,
+            @RequestBody AtualizarPerfilRequest request) {
 
         String email = authentication.getName();
         Usuario usuario = usuarioService.atualizarPerfil(
@@ -29,8 +32,7 @@ public class PerfilController {
     }
 
     @GetMapping("/perfil")
-    public ResponseEntity<Usuario> verPerfil(Authentication authentication){
-
+    public ResponseEntity<Usuario> verPerfil(Authentication authentication) {
         String email = authentication.getName();
         Usuario usuario = usuarioService.buscarPorEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
