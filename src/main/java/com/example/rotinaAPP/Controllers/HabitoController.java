@@ -4,6 +4,7 @@ import com.example.rotinaAPP.Dtos.CriarHabitoRequest;
 import com.example.rotinaAPP.Dtos.HabitoDoDiaResponse;
 import com.example.rotinaAPP.Entities.Habito;
 import com.example.rotinaAPP.Services.HabitoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class HabitoController {
     }
 
     @PostMapping
-    public ResponseEntity<Habito> criar(@RequestBody CriarHabitoRequest request) {
+    public ResponseEntity<Habito> criar(@Valid @RequestBody CriarHabitoRequest request) {
         Habito habito = habitoService.criar(request.usuarioId(), request.titulo(), request.descricao());
         return ResponseEntity.status(HttpStatus.CREATED).body(habito);
     }

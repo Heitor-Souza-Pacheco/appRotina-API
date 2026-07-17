@@ -4,6 +4,7 @@ import com.example.rotinaAPP.Dtos.HabitoDoDiaResponse;
 import com.example.rotinaAPP.Entities.Habito;
 import com.example.rotinaAPP.Entities.RegistroHabito;
 import com.example.rotinaAPP.Entities.Usuario;
+import com.example.rotinaAPP.Exceptions.RecursoNaoEncontradoException;
 import com.example.rotinaAPP.Repositories.HabitoRepository;
 import com.example.rotinaAPP.Repositories.RegistroHabitoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class HabitoService {
     }
 
     public void marcarConcluido(UUID habitoId, LocalDate data) {
+        habitoRepository.findById(habitoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
+
         Optional<RegistroHabito> existente = registroHabitoRepository
                 .findByHabitoIdAndData(habitoId, data);
 
