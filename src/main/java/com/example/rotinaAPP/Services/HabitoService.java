@@ -5,6 +5,7 @@ import com.example.rotinaAPP.Dtos.HabitoDoDiaResponse;
 import com.example.rotinaAPP.Entities.Habito;
 import com.example.rotinaAPP.Entities.RegistroHabito;
 import com.example.rotinaAPP.Entities.Usuario;
+import com.example.rotinaAPP.Exceptions.AcessoNegadoException;
 import com.example.rotinaAPP.Exceptions.RecursoNaoEncontradoException;
 import com.example.rotinaAPP.Repositories.HabitoRepository;
 import com.example.rotinaAPP.Repositories.RegistroHabitoRepository;
@@ -55,7 +56,8 @@ public class HabitoService {
         }).toList();
     }
 
-    public void marcarConcluido(UUID habitoId, LocalDate data) {
+    public void marcarConcluido(UUID habitoId, LocalDate data, String emailUsuarioLogado) {
+        verificarPermissao(habitoId, emailUsuarioLogado);
         habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
@@ -77,12 +79,14 @@ public class HabitoService {
         }
     }
 
-    public void desmarcar(UUID habitoId, LocalDate data) {
+    public void desmarcar(UUID habitoId, LocalDate data, String emailUsuarioLogado) {
+        verificarPermissao(habitoId, emailUsuarioLogado);
         registroHabitoRepository.findByHabitoIdAndData(habitoId, data)
                 .ifPresent(registroHabitoRepository::delete);
     }
 
-    public EstaticaResponse calcularEstatiscas(UUID habitoId){
+    public EstaticaResponse calcularEstatiscas(UUID habitoId, String emailUsuarioLogado){
+        verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
@@ -146,8 +150,9 @@ public class HabitoService {
         );
     }
 
-    public Habito editar(UUID habitoId, String titulo, String descricao, Boolean ativo){
+    public Habito editar(UUID habitoId, String titulo, String descricao, Boolean ativo, String emailUsuarioLogado){
 
+        verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
@@ -158,8 +163,9 @@ public class HabitoService {
         return habitoRepository.save(habito);
     }
 
-    public void deletar(UUID habitoId){
+    public void deletar(UUID habitoId, String emailUsuarioLogado){
 
+        verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
@@ -173,5 +179,15 @@ public class HabitoService {
     public List<Habito> listarTodos(UUID usuarioId){
 
         return habitoRepository.findByUsuarioId(usuarioId);
+    }
+
+    private void verificarPermissao(UUID habitoId, String emailUsuarioLogado){
+
+        Habito habito = habitoRepository.findById(habitoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
+
+        if (!habito.getUsuario().getEmail().equals(emailUsuarioLogado)){
+            throw new AcessoNegadoException("Você não tem permissão para acessar este hábito");
+        }
     }
 }

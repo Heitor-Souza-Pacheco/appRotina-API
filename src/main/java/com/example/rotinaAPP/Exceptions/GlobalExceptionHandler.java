@@ -60,6 +60,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno do servidor");
     }
 
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<Map<String, Object>> handleAcessoNegado(AcessoNegadoException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String mensagem) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
