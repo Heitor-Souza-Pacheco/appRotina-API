@@ -1,6 +1,10 @@
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
+
+### Flutter SDK / hs_err (não pertencem a este repositório) ###
+flutter/
+hs_err_pid*.log
 !**/src/main/**/target/
 !**/src/test/**/target/
 
