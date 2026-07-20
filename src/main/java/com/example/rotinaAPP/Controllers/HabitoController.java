@@ -27,10 +27,10 @@ public class HabitoController {
 
     @GetMapping("/hoje")
     public ResponseEntity<List<HabitoDoDiaResponse>> listarHoje(
-            @RequestParam UUID usuarioId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            Authentication authentication) {
 
-        List<HabitoDoDiaResponse> habitos = habitoService.listarHabitosDoDia(usuarioId, data);
+        List<HabitoDoDiaResponse> habitos = habitoService.listarHabitosDoDia(authentication.getName(), data);
         return ResponseEntity.ok(habitos);
     }
 
@@ -44,14 +44,17 @@ public class HabitoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Habito>> listarTodos(@RequestParam UUID usuarioId) {
-        List<Habito> habitos = habitoService.listarTodos(usuarioId);
+    public ResponseEntity<List<Habito>> listarTodos(Authentication authentication) {
+        List<Habito> habitos = habitoService.listarTodos(authentication.getName());
         return ResponseEntity.ok(habitos);
     }
 
     @PostMapping
-    public ResponseEntity<Habito> criar(@Valid @RequestBody CriarHabitoRequest request) {
-        Habito habito = habitoService.criar(request.usuarioId(), request.titulo(), request.descricao());
+    public ResponseEntity<Habito> criar(
+            @Valid @RequestBody CriarHabitoRequest request,
+            Authentication authentication) {
+
+        Habito habito = habitoService.criar(authentication.getName(), request.titulo(), request.descricao());
         return ResponseEntity.status(HttpStatus.CREATED).body(habito);
     }
 

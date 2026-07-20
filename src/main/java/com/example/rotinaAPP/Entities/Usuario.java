@@ -1,5 +1,6 @@
 package com.example.rotinaAPP.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -17,9 +18,10 @@ public class Usuario {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String senha;
 
@@ -29,12 +31,11 @@ public class Usuario {
     @Column(nullable = false)
     private LocalTime horarioReset;
 
-    @Column(nullable = false)
     private LocalTime horarioNotificacao;
 
-    @Column(nullable = false)
     private String fcmToken;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario")
     private List<Habito> habitos;
 
@@ -106,11 +107,11 @@ public class Usuario {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(senha, usuario.senha) && Objects.equals(fusoHorario, usuario.fusoHorario) && Objects.equals(horarioReset, usuario.horarioReset) && Objects.equals(horarioNotificacao, usuario.horarioNotificacao) && Objects.equals(fcmToken, usuario.fcmToken);
+        return Objects.equals(id, usuario.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, email, senha, fusoHorario, horarioReset, horarioNotificacao, fcmToken);
+        return Objects.hash(id);
     }
 }

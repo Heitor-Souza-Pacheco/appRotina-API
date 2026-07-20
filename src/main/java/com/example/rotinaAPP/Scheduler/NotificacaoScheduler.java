@@ -6,7 +6,6 @@ import com.example.rotinaAPP.Repositories.HabitoRepository;
 import com.example.rotinaAPP.Repositories.RegistroHabitoRepository;
 import com.example.rotinaAPP.Repositories.UsuarioRepository;
 import com.example.rotinaAPP.Services.NotificacaoService;
-import com.example.rotinaAPP.Services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,20 +25,21 @@ public class NotificacaoScheduler {
     private HabitoRepository habitoRepository;
 
     @Autowired
-    private NotificacaoService notificacaoService;
-    @Autowired
     private RegistroHabitoRepository registroHabitoRepository;
 
+    @Autowired
+    private NotificacaoService notificacaoService;
+
     @Scheduled(cron = "0 0 * * * *")
-    public void verificarENotificar(){
-        LocalTime agora = LocalTime.now();
+    public void verificarENotificar() {
+        // Arredonda para a hora cheia (sem minutos/segundos/nanos)
+        LocalTime agora = LocalTime.now().withMinute(0).withSecond(0).withNano(0);
         LocalDate hoje = LocalDate.now();
 
         List<Usuario> usuarios = usuarioRepository.findByHorarioNotificacao(agora);
 
-        for (Usuario usuario : usuarios){
-
-            if (usuario.getFcmToken() == null || usuario.getFcmToken().isBlank()){
+        for (Usuario usuario : usuarios) {
+            if (usuario.getFcmToken() == null || usuario.getFcmToken().isBlank()) {
                 continue;
             }
 
@@ -52,9 +52,13 @@ public class NotificacaoScheduler {
                     .map(Habito::getTitulo)
                     .collect(Collectors.toList());
 
-            if (!pendentes.isEmpty()){
+            if (!pendentes.isEmpty()) {
                 String corpo = "Ainda falta: " + String.join(", ", pendentes) + ". Bora!";
-                notificacaoService.enviarNotificacao(usuario.getFcmToken(), "Ei, não esqueça dos hábitos!", corpo);
+                notificacaoService.enviarNotificacao(
+                        usuario.getFcmToken(),
+                        "Ei, não esqueça dos hábitos!",
+                        corpo
+                );
             }
         }
     }

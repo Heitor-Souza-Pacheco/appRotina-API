@@ -9,6 +9,7 @@ import com.example.rotinaAPP.Exceptions.AcessoNegadoException;
 import com.example.rotinaAPP.Exceptions.RecursoNaoEncontradoException;
 import com.example.rotinaAPP.Repositories.HabitoRepository;
 import com.example.rotinaAPP.Repositories.RegistroHabitoRepository;
+import com.example.rotinaAPP.Repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,20 +27,26 @@ public class HabitoService {
     @Autowired
     private RegistroHabitoRepository registroHabitoRepository;
 
-    public Habito criar(UUID usuarioId, String titulo, String descricao) {
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    public Habito criar(String emailUsuarioLogado, String titulo, String descricao) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuarioLogado)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+
         Habito habito = new Habito();
         habito.setTitulo(titulo);
         habito.setDescricao(descricao);
         habito.setAtivo(true);
-
-        Usuario usuario = new Usuario();
-        usuario.setId(usuarioId);
         habito.setUsuario(usuario);
         return habitoRepository.save(habito);
     }
 
-    public List<HabitoDoDiaResponse> listarHabitosDoDia(UUID usuarioId, LocalDate data) {
-        List<Habito> habitos = habitoRepository.findByUsuarioIdAndAtivoTrue(usuarioId);
+    public List<HabitoDoDiaResponse> listarHabitosDoDia(String emailUsuarioLogado, LocalDate data) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuarioLogado)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+
+        List<Habito> habitos = habitoRepository.findByUsuarioIdAndAtivoTrue(usuario.getId());
 
         return habitos.stream().map(habito -> {
             boolean concluido = registroHabitoRepository
@@ -58,8 +65,6 @@ public class HabitoService {
 
     public void marcarConcluido(UUID habitoId, LocalDate data, String emailUsuarioLogado) {
         verificarPermissao(habitoId, emailUsuarioLogado);
-        habitoRepository.findById(habitoId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
         Optional<RegistroHabito> existente = registroHabitoRepository
                 .findByHabitoIdAndData(habitoId, data);
@@ -70,8 +75,7 @@ public class HabitoService {
             registroHabitoRepository.save(registro);
         } else {
             RegistroHabito registro = new RegistroHabito();
-            Habito habito = new Habito();
-            habito.setId(habitoId);
+            Habito habito = habitoRepository.findById(habitoId).get();
             registro.setHabito(habito);
             registro.setData(data);
             registro.setConcluido(true);
@@ -85,7 +89,7 @@ public class HabitoService {
                 .ifPresent(registroHabitoRepository::delete);
     }
 
-    public EstaticaResponse calcularEstatiscas(UUID habitoId, String emailUsuarioLogado){
+    public EstaticaResponse calcularEstatiscas(UUID habitoId, String emailUsuarioLogado) {
         verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
@@ -94,9 +98,9 @@ public class HabitoService {
 
         int streakAtual = 0;
         LocalDate dia = hoje;
-        while (true){
+        while (true) {
             Optional<RegistroHabito> registro = registroHabitoRepository.findByHabitoIdAndData(habitoId, dia);
-            if (registro.isPresent() && registro.get().isConcluido()){
+            if (registro.isPresent() && registro.get().isConcluido()) {
                 streakAtual++;
                 dia = dia.minusDays(1);
             } else {
@@ -117,9 +121,8 @@ public class HabitoService {
                 .sorted()
                 .toList();
 
-        for (LocalDate d : diasConcluidos){
-
-            if (diaAnterior == null || d.equals(diaAnterior.plusDays(1))){
+        for (LocalDate d : diasConcluidos) {
+            if (diaAnterior == null || d.equals(diaAnterior.plusDays(1))) {
                 streakTemp++;
             } else {
                 streakTemp = 1;
@@ -128,7 +131,8 @@ public class HabitoService {
             diaAnterior = d;
         }
 
-        long concluidosSemana = registroHabitoRepository.findByHabitoIdAndDataBetween(habitoId, hoje.minusDays(6), hoje)
+        long concluidosSemana = registroHabitoRepository
+                .findByHabitoIdAndDataBetween(habitoId, hoje.minusDays(6), hoje)
                 .stream().filter(RegistroHabito::isConcluido).count();
         double taxaSemana = (concluidosSemana / 7.0) * 100;
 
@@ -137,21 +141,14 @@ public class HabitoService {
                 .stream().filter(RegistroHabito::isConcluido).count();
         double taxaMes = (concluidosMes / 30.0) * 100;
 
-        int totalDiasConcluidos = (int) diasConcluidos.size();
+        int totalDiasConcluidos = diasConcluidos.size();
 
         return new EstaticaResponse(
-                habito.getId(),
-                habito.getTitulo(),
-                streakAtual,
-                maiorStreak,
-                taxaSemana,
-                taxaMes,
-                totalDiasConcluidos
-        );
+                habito.getId(), habito.getTitulo(), streakAtual, maiorStreak,
+                taxaSemana, taxaMes, totalDiasConcluidos);
     }
 
-    public Habito editar(UUID habitoId, String titulo, String descricao, Boolean ativo, String emailUsuarioLogado){
-
+    public Habito editar(UUID habitoId, String titulo, String descricao, Boolean ativo, String emailUsuarioLogado) {
         verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
@@ -163,8 +160,7 @@ public class HabitoService {
         return habitoRepository.save(habito);
     }
 
-    public void deletar(UUID habitoId, String emailUsuarioLogado){
-
+    public void deletar(UUID habitoId, String emailUsuarioLogado) {
         verificarPermissao(habitoId, emailUsuarioLogado);
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
@@ -172,21 +168,20 @@ public class HabitoService {
         List<RegistroHabito> registros = registroHabitoRepository
                 .findByHabitoIdAndDataBetween(habitoId, LocalDate.of(2000, 1, 1), LocalDate.now());
         registroHabitoRepository.deleteAll(registros);
-
         habitoRepository.delete(habito);
     }
 
-    public List<Habito> listarTodos(UUID usuarioId){
-
-        return habitoRepository.findByUsuarioId(usuarioId);
+    public List<Habito> listarTodos(String emailUsuarioLogado) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuarioLogado)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+        return habitoRepository.findByUsuarioId(usuario.getId());
     }
 
-    private void verificarPermissao(UUID habitoId, String emailUsuarioLogado){
-
+    private void verificarPermissao(UUID habitoId, String emailUsuarioLogado) {
         Habito habito = habitoRepository.findById(habitoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito não encontrado"));
 
-        if (!habito.getUsuario().getEmail().equals(emailUsuarioLogado)){
+        if (!habito.getUsuario().getEmail().equals(emailUsuarioLogado)) {
             throw new AcessoNegadoException("Você não tem permissão para acessar este hábito");
         }
     }
