@@ -11,5 +11,4 @@ public class RotinaAppApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RotinaAppApplication.class, args);
 	}
-		SpringApplication.run(RotinaAppApplication.class, args);
 }
