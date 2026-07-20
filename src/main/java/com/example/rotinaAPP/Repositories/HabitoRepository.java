@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface HabitoRepository extends JpaRepository<Habito, UUID> {
 
     List<Habito> findByUsuarioIdAndAtivoTrue(UUID usuarioId);
+    List<Habito> findByUsuarioId(UUID usuarioId);
 }

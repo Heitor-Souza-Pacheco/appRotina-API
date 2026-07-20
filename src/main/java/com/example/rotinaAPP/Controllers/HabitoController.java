@@ -1,10 +1,13 @@
 package com.example.rotinaAPP.Controllers;
 
 import com.example.rotinaAPP.Dtos.CriarHabitoRequest;
+import com.example.rotinaAPP.Dtos.EditarHabitoRequest;
+import com.example.rotinaAPP.Dtos.EstaticaResponse;
 import com.example.rotinaAPP.Dtos.HabitoDoDiaResponse;
 import com.example.rotinaAPP.Entities.Habito;
 import com.example.rotinaAPP.Services.HabitoService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,18 @@ public class HabitoController {
         return ResponseEntity.ok(habitos);
     }
 
+    @GetMapping("/{habitoId}/estatisticas")
+    public ResponseEntity<EstaticaResponse> estatiscas(@PathVariable UUID habitoId){
+        EstaticaResponse stats = habitoService.calcularEstatiscas(habitoId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Habito>> listarTodos(@RequestParam UUID usuarioId){
+        List<Habito> habitos = habitoService.listarTodos(usuarioId);
+        return ResponseEntity.ok(habitos);
+    }
+
     @PostMapping
     public ResponseEntity<Habito> criar(@Valid @RequestBody CriarHabitoRequest request) {
         Habito habito = habitoService.criar(request.usuarioId(), request.titulo(), request.descricao());
@@ -44,6 +59,21 @@ public class HabitoController {
 
         habitoService.marcarConcluido(habitoId, data);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{habitoId}")
+    public ResponseEntity<Habito> editar(
+            @PathVariable UUID habitoId,
+            @RequestBody EditarHabitoRequest request) {
+
+        Habito habito = habitoService.editar(habitoId, request.titulo(), request.descricao(), request.ativo());
+        return ResponseEntity.ok(habito);
+    }
+
+    @DeleteMapping("/{habitoId}")
+    public ResponseEntity<Void> deletar(@PathVariable UUID habitoId) {
+        habitoService.deletar(habitoId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{habitoId}/concluir")
