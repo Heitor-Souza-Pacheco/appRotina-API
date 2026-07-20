@@ -17,7 +17,7 @@ public class Usuario {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -29,8 +29,10 @@ public class Usuario {
     @Column(nullable = false)
     private LocalTime horarioReset;
 
+    @Column(nullable = false)
     private LocalTime horarioNotificacao;
 
+    @Column(nullable = false)
     private String fcmToken;
 
     @OneToMany(mappedBy = "usuario")
@@ -104,11 +106,11 @@ public class Usuario {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id);
+        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(senha, usuario.senha) && Objects.equals(fusoHorario, usuario.fusoHorario) && Objects.equals(horarioReset, usuario.horarioReset) && Objects.equals(horarioNotificacao, usuario.horarioNotificacao) && Objects.equals(fcmToken, usuario.fcmToken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, nome, email, senha, fusoHorario, horarioReset, horarioNotificacao, fcmToken);
     }
 }
