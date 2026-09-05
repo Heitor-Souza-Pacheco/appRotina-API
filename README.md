@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/approtinabanner.jpg" width="100%" alt="App Rotina API">
+  <img src="./assets/approtinaapibanner.png" width="100%" alt="App Rotina API">
 </p>
 
 <p align="center">
